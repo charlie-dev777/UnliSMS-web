@@ -12,6 +12,5 @@ export { SystemHealthPanel } from "./system-health-panel";
 export { GatewayHealthPanel } from "./gateway-health-panel";
 export { RecentRegistrationsTable } from "./recent-registrations-table";
 export { RecentFailuresTable } from "./recent-failures-table";
-export { SignalBars } from "./signal-bars";
 export { UptimeBar } from "./uptime-bar";
 export { DashboardSkeleton } from "./dashboard-skeleton";

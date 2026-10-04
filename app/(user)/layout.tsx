@@ -13,7 +13,7 @@ export default async function UserPortalLayout({ children }: { children: React.R
     <AppShell
       portal="user"
       user={user}
-      badges={{ "/gateways": { kind: "count", text: `${shell.gatewaysOnline}/${shell.gatewaysTotal}` } }}
+      badges={shell.gateways ? { "/gateways": { kind: "count", text: `${shell.gateways.online}/${shell.gateways.total}` } } : undefined}
       unreadNotifications={shell.hasUnreadNotifications}
       sidebarFooter={<PlanUsageCard subscription={shell.subscription} />}
       headerActions={

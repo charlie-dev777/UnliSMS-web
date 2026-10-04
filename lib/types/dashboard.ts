@@ -1,4 +1,3 @@
-import type { Gateway } from "./gateway";
 import type { Message } from "./message";
 import type { DailyVolume, DashboardMetrics, GatewayFleetHealth, PlatformMetrics, Registration } from "./metrics";
 import type { Subscription } from "./subscription";
@@ -11,7 +10,6 @@ export interface UserDashboardData {
   generatedAt: string; // ISO 8601; relative times are measured from here
   metrics: DashboardMetrics | null;
   activity: DailyVolume[];
-  gateways: Gateway[];
   messages: Message[];
   webhookDeliveries: WebhookDelivery[];
 }
@@ -31,8 +29,8 @@ export interface AdminDashboardData {
 export interface UserShellData {
   user: User;
   subscription: Subscription;
-  gatewaysOnline: number;
-  gatewaysTotal: number;
+  /** Live counts for the nav badge; null when the API refused or failed the read. */
+  gateways: { online: number; total: number } | null;
   hasUnreadNotifications: boolean;
 }
 

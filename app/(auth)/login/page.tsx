@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Clock } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LogoMark } from "@/components/layout/logo";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default function LoginPage() {
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function LoginPage({ searchParams }: Props) {
+  // Set by /session/expired after the API rejected the session (HTTP 401).
+  const expired = (await searchParams).expired === "1";
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <main className="flex flex-1 items-center justify-center px-4 py-12">
@@ -17,6 +24,13 @@ export default function LoginPage() {
               <p className="m-0 text-sm text-muted-foreground">Enter your email and password to continue.</p>
             </div>
           </div>
+
+          {expired && (
+            <Alert className="w-full">
+              <Clock aria-hidden />
+              <AlertDescription>Your session has ended. Sign in again to continue.</AlertDescription>
+            </Alert>
+          )}
 
           <LoginForm />
 

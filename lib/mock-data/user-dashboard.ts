@@ -1,4 +1,4 @@
-import type { DailyVolume, DashboardMetrics, Gateway, Message, UserDashboardData, WebhookDelivery } from "@/lib/types";
+import type { DailyVolume, DashboardMetrics, Message, UserDashboardData, WebhookDelivery } from "@/lib/types";
 import { ago, lastDays } from "./time";
 
 const SENT = [1620, 1710, 1580, 1840, 1920, 1490, 1380, 1690, 1760, 1810, 1950, 2040, 1720, 1560];
@@ -19,53 +19,6 @@ const metrics: DashboardMetrics = {
   callsAnswered: 842,
   callsMissed: 57,
 };
-
-function gateways(now: Date): Gateway[] {
-  return [
-    {
-      id: "gw_8f2k3x91a",
-      name: "Office Pixel 7",
-      deviceModel: "Pixel 7",
-      androidVersion: "14",
-      status: "online",
-      sims: [
-        { slot: 1, carrier: "Globe", maskedNumber: "+63 917 ••• 4821", signal: 4 },
-        { slot: 2, carrier: "Smart", maskedNumber: "+63 918 ••• 1907", signal: 3 },
-      ],
-      lastSeenAt: ago(now, { sec: 3 }),
-    },
-    {
-      id: "gw_2m7q4c0dz",
-      name: "Warehouse A54",
-      deviceModel: "Galaxy A54",
-      androidVersion: "14",
-      status: "online",
-      sims: [{ slot: 1, carrier: "Smart", maskedNumber: "+63 919 ••• 3310", signal: 4 }, null],
-      lastSeenAt: ago(now, { sec: 12 }),
-    },
-    {
-      id: "gw_5r1t8v6kb",
-      name: "Cebu Branch",
-      deviceModel: "Redmi Note 12",
-      androidVersion: "13",
-      status: "online",
-      sims: [
-        { slot: 1, carrier: "DITO", maskedNumber: "+63 991 ••• 6624", signal: 1 },
-        { slot: 2, carrier: "Globe", maskedNumber: "+63 927 ••• 0458", signal: 3 },
-      ],
-      lastSeenAt: ago(now, { sec: 48 }),
-    },
-    {
-      id: "gw_9h3n2p7ws",
-      name: "Backup Moto",
-      deviceModel: "Moto G54",
-      androidVersion: "13",
-      status: "offline",
-      sims: [{ slot: 1, carrier: "Globe", maskedNumber: "+63 905 ••• 7712", signal: 0 }, null],
-      lastSeenAt: ago(now, { hr: 3 }),
-    },
-  ];
-}
 
 function messages(now: Date): Message[] {
   const m = (
@@ -112,7 +65,6 @@ export function createUserDashboardMock(now: Date): UserDashboardData {
     generatedAt: now.toISOString(),
     metrics,
     activity: activity(now),
-    gateways: gateways(now),
     messages: messages(now),
     webhookDeliveries: webhookDeliveries(now),
   };
@@ -124,10 +76,8 @@ export function createEmptyUserDashboardMock(now: Date): UserDashboardData {
     generatedAt: now.toISOString(),
     metrics: null,
     activity: lastDays(now, 14).map((date) => ({ date, outbound: 0, inbound: 0 })),
-    gateways: [],
     messages: [],
     webhookDeliveries: [],
   };
 }
 
-export { gateways as createMockGateways };

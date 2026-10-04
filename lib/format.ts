@@ -46,6 +46,21 @@ export const formatClockTime = (iso: string) => clock.format(new Date(iso));
 /** "Oct 2". */
 export const formatMonthDay = (iso: string) => monthDay.format(new Date(iso));
 
+const dateTime = new Intl.DateTimeFormat("en-US", {
+  timeZone: TIME_ZONE,
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+/** "Oct 4, 2026, 10:42 AM" (PHT). */
+export const formatDateTime = (iso: string) => dateTime.format(new Date(iso));
+
+/** 512 → "512 MB", 41230 → "40.3 GB". */
+export const formatMegabytes = (mb: number) => (mb >= 1024 ? `${+(mb / 1024).toFixed(1)} GB` : `${formatNumber(mb)} MB`);
+
 /** "Just now", "12 sec ago", "2 min ago", "3 hr ago", "Yesterday", "Sep 28". */
 export function formatRelativeTime(iso: string, now: Date = new Date()) {
   const then = new Date(iso);

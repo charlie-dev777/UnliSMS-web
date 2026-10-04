@@ -345,7 +345,7 @@ export default function DesignSystemPage() {
             <Row label="Gateways">
               <GatewayStatusBadge status="online" />
               <GatewayStatusBadge status="offline" />
-              <GatewayStatusBadge status="weak_signal" />
+              <GatewayStatusBadge status="unknown" />
             </Row>
             <Row label="Webhooks">
               <WebhookStatusBadge state="succeeded" responseStatus={200} />

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AlertTriangle, CalendarDays, CheckCheck, ChevronDown, Inbox, PhoneIncoming, PhoneMissed, Send, Webhook, XCircle } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { getUserDashboard } from "@/lib/data/dashboard";
+import { listGateways } from "@/lib/data/gateways";
 import { parseScenario } from "@/lib/mock-data";
 import { formatChangePct, formatNumber, formatPercent, ratioPct } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,10 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 export default async function DashboardPage({ searchParams }: Props) {
   const user = await requireUser();
-  const data = await getUserDashboard(user.id, { scenario: parseScenario((await searchParams).mock) });
+  const [data, gateways] = await Promise.all([
+    getUserDashboard(user.id, { scenario: parseScenario((await searchParams).mock) }),
+    listGateways(),
+  ]);
   const now = new Date(data.generatedAt);
   const m = data.metrics;
   const period = `vs previous ${m?.periodDays ?? 7} days`;
@@ -104,7 +108,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       </SplitRow>
 
       <SplitRow>
-        <GatewayStatusPanel gateways={data.gateways} now={now} />
+        <GatewayStatusPanel result={gateways} now={new Date()} />
         <WebhookActivityPanel deliveries={data.webhookDeliveries} now={now} />
       </SplitRow>
 

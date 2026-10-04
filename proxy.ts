@@ -18,10 +18,12 @@ export function proxy(request: NextRequest) {
   if (pathname === "/login") return user ? to(HOME_BY_ROLE[user.role]) : NextResponse.next();
   if (!user) return to("/login");
   if (pathname.startsWith("/admin") && user.role !== "ADMIN") return to(HOME_BY_ROLE[user.role]);
-  if (pathname.startsWith("/dashboard") && user.role !== "USER") return to(HOME_BY_ROLE[user.role]);
+  if (USER_ROUTES.some((route) => pathname.startsWith(route)) && user.role !== "USER") return to(HOME_BY_ROLE[user.role]);
   return NextResponse.next();
 }
 
+const USER_ROUTES = ["/dashboard", "/gateways"];
+
 export const config = {
-  matcher: ["/login", "/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/login", "/dashboard/:path*", "/gateways/:path*", "/admin/:path*"],
 };

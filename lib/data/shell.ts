@@ -1,14 +1,18 @@
-// Data for the portal shells (sidebar badges, plan usage). Mock in Phase 1.
+// Data for the portal shells (sidebar badges, plan usage). Gateway counts are live;
+// subscription, notifications and the admin shell are still mock.
 import type { AdminShellData, User, UserShellData } from "@/lib/types";
-import { createAdminDashboardMock, createMockGateways, mockSubscription, mockSystemHealth } from "@/lib/mock-data";
+import { createAdminDashboardMock, mockSubscription, mockSystemHealth } from "@/lib/mock-data";
+import { listGateways } from "./gateways";
 
 export async function getUserShell(user: User): Promise<UserShellData> {
-  const gateways = createMockGateways(new Date());
+  // Shares the page's request via React cache(), so the dashboard doesn't fetch twice.
+  const gateways = await listGateways();
   return {
     user,
     subscription: mockSubscription(user.id),
-    gatewaysOnline: gateways.filter((g) => g.status === "online").length,
-    gatewaysTotal: gateways.length,
+    gateways: gateways.ok
+      ? { online: gateways.data.filter((g) => g.presence === "online").length, total: gateways.data.length }
+      : null,
     hasUnreadNotifications: true,
   };
 }
