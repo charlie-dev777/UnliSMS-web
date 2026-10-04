@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UnliSMS web portal
 
-## Getting Started
-
-First, run the development server:
+Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui (Radix) + Lucide.
+The visual reference is the Claude Design canvas **UnliSMS Portal**.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm run build
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Phase 1 scope
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | Who | Notes |
+| --- | --- | --- |
+| `/login` | everyone | One sign-in for both portals; the account role picks the destination |
+| `/dashboard` | `USER` | User portal |
+| `/admin/dashboard` | `ADMIN` | Admin portal (`/admin` redirects here) |
+| `/design-system` | everyone | Living reference of tokens and components |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Other sidebar links (Messages, Gateways, Webhooks, …) point at Phase 2 pages that don't exist yet.
 
-## Learn More
+### Preview sign-in (mock only)
 
-To learn more about Next.js, take a look at the following resources:
+Authentication is **not** implemented. `lib/auth/` sets a preview cookie holding a mock user id;
+`proxy.ts` and the portal layouts route on its role. Any non-empty password works:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Email | Role | Lands on |
+| --- | --- | --- |
+| `maria@acme.ph` | USER | `/dashboard` |
+| `jun@unlisms.test` | ADMIN | `/admin/dashboard` |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Previewing states
 
-## Deploy on Vercel
+In development, append `?mock=` to either dashboard:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `?mock=empty` – new account with no data (empty states, `—` metrics)
+- `?mock=error` – the data loader throws (route error state with “Try again”)
+- `?mock=slow` – holds the loading skeleton for 1.5 s (navigate in from another route to see it)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Structure
+
+```
+app/
+  (auth)/login/          login page + form (server action in lib/auth/actions.ts)
+  (user)/                user portal layout, /dashboard (+ loading, error)
+  admin/                 admin portal layout, /admin/dashboard (+ loading, error)
+  design-system/         component reference page
+components/
+  ui/                    shadcn/ui primitives styled to the UnliSMS tokens
+  layout/                AppShell, AppSidebar, AppHeader, MobileNav, PageHeader, AccountMenu, nav config
+  dashboard/             MetricCard, MetricStrip, MessageActivityChart, DeliveryRatePanel, GatewayStatusPanel,
+                         WebhookActivityPanel, RecentMessagesTable, SystemHealthPanel, GatewayHealthPanel, …
+  status/                StatusBadge + Message/Gateway/Webhook/Service status badges, PlanBadge
+  feedback/              EmptyState, ErrorState, ListSkeleton, RouteError
+lib/
+  types/                 API-facing types (User, Gateway, SimSlot, Message, Webhook, DashboardMetrics, …)
+  mock-data/             typed mock factories (Philippine carriers and numbers)
+  data/                  data access used by pages – swap these bodies for API calls
+  auth/                  mock session (preview only)
+  format.ts              number / percent / time formatting (Asia/Manila)
+proxy.ts                 optimistic role routing for the mock session
+```
+
+### Replacing mock data
+
+Pages only call `lib/data/*` and only depend on `lib/types`. To connect the API, reimplement
+`getUserDashboard`, `getAdminDashboard`, `getUserShell` and `getAdminShell` to return the same
+types; no component changes are needed. Mock data uses raw counts and ISO timestamps, so the UI
+derives rates, percentages and relative times the same way it will for live data.
+
+### Design tokens
+
+Tokens live in `app/globals.css` under shadcn names (`primary`, `muted-foreground`, `accent`,
+`destructive`, `input`, `ring`, `sidebar`, …) plus UnliSMS brand and status tokens (`brand`,
+`brand-tint`, `success-*`, `warning-*`, `danger-*`, `offline`). Use the Tailwind utilities
+(`bg-primary`, `text-muted-foreground`, `bg-brand`), not hex values. `components.json` is set up so
+`npx shadcn add <component>` generates into `components/ui` with these tokens.

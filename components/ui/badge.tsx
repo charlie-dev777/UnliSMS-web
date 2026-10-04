@@ -2,37 +2,38 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// Pill, 22px, soft tint + 1px border + optional dot. One mapping across
+// Pill, 24px tall as rendered on the canvas (22px + border), soft tint + 1px border + optional dot. One mapping across
 // messages, gateways, webhooks and services.
-export const badgeVariants = cva(
-  "inline-flex h-[22px] items-center gap-1.5 whitespace-nowrap rounded-full border px-2 text-xs font-medium",
-  {
-    variants: {
-      variant: {
-        success: "border-[#C9EFD5] bg-success-soft text-success-fg",
-        warning: "border-[#F4E1A6] bg-warning-soft text-warning-fg",
-        danger: "border-[#FBD0CB] bg-danger-soft text-danger-fg",
-        info: "border-[#CFE5FC] bg-primary-soft text-info-fg",
-        neutral: "border-border bg-muted text-neutral-fg",
-      },
+export const badgeVariants = cva("inline-flex items-center gap-1.5 whitespace-nowrap border font-medium", {
+  variants: {
+    variant: {
+      success: "border-success-border bg-success-soft text-success-foreground",
+      warning: "border-warning-border bg-warning-soft text-warning-foreground",
+      danger: "border-danger-border bg-danger-soft text-destructive",
+      info: "border-info-border bg-accent text-info-foreground",
+      neutral: "border-border bg-muted text-neutral-foreground",
     },
-    defaultVariants: { variant: "neutral" },
+    shape: {
+      pill: "h-6 rounded-full px-2 text-xs",
+      /** Square-ish tag, e.g. the "Admin" label next to the wordmark. */
+      tag: "h-[22px] rounded-md px-1.5 text-[11px]",
+    },
   },
-);
+  defaultVariants: { variant: "neutral", shape: "pill" },
+});
 
 export type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {
-  dot?: boolean;
-  dotClassName?: string;
-}
+export type BadgeProps = React.ComponentProps<"span"> &
+  VariantProps<typeof badgeVariants> & {
+    dot?: boolean;
+    dotClassName?: string;
+  };
 
-export function Badge({ className, variant, dot, dotClassName, children, ...props }: BadgeProps) {
+export function Badge({ className, variant, shape, dot, dotClassName, children, ...props }: BadgeProps) {
   return (
-    <span className={cn(badgeVariants({ variant }), className)} {...props}>
-      {dot && <span className={cn("size-1.5 shrink-0 rounded-full bg-current", dotClassName)} />}
+    <span data-slot="badge" className={cn(badgeVariants({ variant, shape }), className)} {...props}>
+      {dot && <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full bg-current", dotClassName)} />}
       {children}
     </span>
   );
