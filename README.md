@@ -21,15 +21,25 @@ npm run lint
 
 Other sidebar links (Messages, Gateways, Webhooks, …) point at Phase 2 pages that don't exist yet.
 
-### Preview sign-in (mock only)
+### Authentication
 
-Authentication is **not** implemented. `lib/auth/` sets a preview cookie holding a mock user id;
-`proxy.ts` and the portal layouts route on its role. Any non-empty password works:
+Sign-in uses the OnSim API (`POST /v1/auth/login`, contract verified against onsim-api source). The server
+action seals the returned bearer token and identity (AES-256-GCM) into the httpOnly
+`unlisms_session` cookie; the token never reaches client JavaScript. `proxy.ts` routes
+optimistically on that cookie, and `requireUser()` / `requireAdmin()` in `lib/auth/session.ts`
+re-check in every portal layout and page. The OnSim API remains authoritative for data.
 
-| Email | Role | Lands on |
-| --- | --- | --- |
-| `maria@acme.ph` | USER | `/dashboard` |
-| `jun@unlisms.test` | ADMIN | `/admin/dashboard` |
+Copy `.env.example` to `.env.local` and set:
+
+| Variable | Purpose |
+| --- | --- |
+| `ONSIM_API_BASE_URL` | OnSim API base URL (server-only) |
+| `SESSION_SECRET` | ≥ 32 random characters for sealing the session cookie (`openssl rand -base64 48`) |
+
+Backend gaps: the API has no logout/revocation endpoint (sign-out clears the web session; the token
+expires at its `expires_at`), no current-user endpoint (identity comes from the login response),
+and no platform role — every account is `USER` and `/admin/*` stays closed until the API exposes
+one (map it in `roleFrom()` in `lib/auth/session-cookie.ts`).
 
 ### Previewing states
 
@@ -58,9 +68,9 @@ lib/
   types/                 API-facing types (User, Gateway, SimSlot, Message, Webhook, DashboardMetrics, …)
   mock-data/             typed mock factories (Philippine carriers and numbers)
   data/                  data access used by pages – swap these bodies for API calls
-  auth/                  mock session (preview only)
+  auth/                  OnSim login client, sealed session cookie, requireUser/requireAdmin
   format.ts              number / percent / time formatting (Asia/Manila)
-proxy.ts                 optimistic role routing for the mock session
+proxy.ts                 optimistic role routing on the session cookie
 ```
 
 ### Replacing mock data

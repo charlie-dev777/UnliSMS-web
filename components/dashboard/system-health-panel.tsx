@@ -20,10 +20,12 @@ export function SystemHealthPanel({ system }: { system: SystemHealth }) {
       <ul className="m-0 list-none p-0">
         {system.services.map((svc) => (
           <li key={svc.id} className="flex flex-col gap-2 border-t border-border px-5 py-3">
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-medium">{svc.name}</span>
-              <span className="truncate text-xs text-muted-foreground">{svc.detail}</span>
-              <ServiceStatusBadge status={svc.status} className="ml-auto" />
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="shrink-0 text-[13px] font-medium whitespace-nowrap">{svc.name}</span>
+              <span className="min-w-0 truncate text-xs text-muted-foreground" title={svc.detail}>
+                {svc.detail}
+              </span>
+              <ServiceStatusBadge status={svc.status} className="ml-auto shrink-0" />
             </div>
             <UptimeBar daily={svc.daily} uptimePct={svc.uptimePct} />
           </li>

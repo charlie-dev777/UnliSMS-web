@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { requireRole } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import { getUserShell } from "@/lib/data/shell";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/layout/app-shell";
 import { PlanUsageCard } from "@/components/layout/plan-usage-card";
 
 export default async function UserPortalLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireRole("USER");
+  const user = await requireUser();
   const shell = await getUserShell(user);
 
   return (

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AlertTriangle, CalendarDays, CheckCheck, ChevronDown, Inbox, PhoneIncoming, PhoneMissed, Send, Webhook, XCircle } from "lucide-react";
-import { requireRole } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import { getUserDashboard } from "@/lib/data/dashboard";
 import { parseScenario } from "@/lib/mock-data";
 import { formatChangePct, formatNumber, formatPercent, ratioPct } from "@/lib/format";
@@ -25,7 +25,7 @@ export const metadata: Metadata = { title: "Dashboard" };
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export default async function DashboardPage({ searchParams }: Props) {
-  const user = await requireRole("USER");
+  const user = await requireUser();
   const data = await getUserDashboard(user.id, { scenario: parseScenario((await searchParams).mock) });
   const now = new Date(data.generatedAt);
   const m = data.metrics;

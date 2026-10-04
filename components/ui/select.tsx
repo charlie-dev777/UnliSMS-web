@@ -15,7 +15,7 @@ export function SelectTrigger({ className, children, ...props }: React.Component
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      className={cn(inputClassName, "flex cursor-pointer items-center justify-between gap-2 text-left data-[placeholder]:text-placeholder", className)}
+      className={cn(inputClassName, "flex cursor-pointer items-center text-sm justify-between gap-2 text-left data-[placeholder]:text-placeholder", className)}
       {...props}
     >
       <span className="truncate">{children}</span>

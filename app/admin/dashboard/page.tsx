@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Activity, AlertTriangle, CalendarDays, CheckCheck, ChevronDown, CreditCard, Download, MessageSquare, Users } from "lucide-react";
-import { requireRole } from "@/lib/auth/session";
+import { requireAdmin } from "@/lib/auth/session";
 import { getAdminDashboard } from "@/lib/data/dashboard";
 import { parseScenario } from "@/lib/mock-data";
 import { formatChangePct, formatChangePts, formatNumber, formatPercent, ratioPct } from "@/lib/format";
@@ -26,7 +26,7 @@ export const metadata: Metadata = { title: "Admin dashboard" };
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export default async function AdminDashboardPage({ searchParams }: Props) {
-  await requireRole("ADMIN");
+  await requireAdmin();
   const data = await getAdminDashboard({ scenario: parseScenario((await searchParams).mock) });
   const now = new Date(data.generatedAt);
   const m = data.metrics;

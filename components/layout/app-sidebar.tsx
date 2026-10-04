@@ -50,7 +50,7 @@ export function AppSidebar({ portal, user, badges = {}, footer, onNavigate }: Ap
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  "flex h-10 items-center gap-2.5 rounded-lg px-2.5 lg:h-9 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                   active ? "bg-accent text-accent-foreground" : "text-foreground-2 hover:bg-sidebar-hover hover:text-foreground",
                 )}
               >

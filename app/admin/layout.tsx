@@ -1,11 +1,11 @@
-import { requireRole } from "@/lib/auth/session";
+import { requireAdmin } from "@/lib/auth/session";
 import { getAdminShell } from "@/lib/data/shell";
 import type { NavBadges } from "@/components/layout/nav";
 import { AppShell } from "@/components/layout/app-shell";
 import { formatNumber } from "@/lib/format";
 
 export default async function AdminPortalLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireRole("ADMIN");
+  const user = await requireAdmin();
   const shell = await getAdminShell(user);
 
   const badges: NavBadges = {};

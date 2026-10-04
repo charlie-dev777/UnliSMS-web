@@ -1,15 +1,4 @@
-import type { Plan, Subscription, User } from "@/lib/types";
-
-// Preview sign-in accounts. Any non-empty password is accepted.
-export const mockUsers: User[] = [
-  { id: "usr_mreyes", name: "Maria Reyes", email: "maria@acme.ph", role: "USER", emailVerified: true, createdAt: "2026-03-14T02:10:00Z" },
-  { id: "usr_jcruz", name: "Jun Cruz", email: "jun@unlisms.test", role: "ADMIN", emailVerified: true, createdAt: "2025-11-02T01:00:00Z" },
-];
-
-export const findMockUserByEmail = (email: string) =>
-  mockUsers.find((u) => u.email.toLowerCase() === email.trim().toLowerCase()) ?? null;
-
-export const findMockUserById = (id: string) => mockUsers.find((u) => u.id === id) ?? null;
+import type { Plan, Subscription } from "@/lib/types";
 
 export const plans: Record<Plan["tier"], Plan> = {
   FREE: { tier: "FREE", name: "Free plan", monthlySmsLimit: 500 },
