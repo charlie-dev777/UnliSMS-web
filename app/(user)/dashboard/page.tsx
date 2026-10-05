@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AlertTriangle, CalendarDays, CheckCheck, ChevronDown, Inbox, PhoneIncoming, PhoneMissed, Send, Webhook, XCircle } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { getUserDashboard } from "@/lib/data/dashboard";
 import { listGateways } from "@/lib/data/gateways";
+import { listMessages } from "@/lib/data/messages";
 import { parseScenario } from "@/lib/mock-data";
 import { formatChangePct, formatNumber, formatPercent, ratioPct } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -27,9 +29,10 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 export default async function DashboardPage({ searchParams }: Props) {
   const user = await requireUser();
-  const [data, gateways] = await Promise.all([
+  const [data, gateways, messages] = await Promise.all([
     getUserDashboard(user.id, { scenario: parseScenario((await searchParams).mock) }),
     listGateways(),
+    listMessages(),
   ]);
   const now = new Date(data.generatedAt);
   const m = data.metrics;
@@ -48,9 +51,11 @@ export default async function DashboardPage({ searchParams }: Props) {
               Last 7 days
               <ChevronDown className="text-muted-foreground" />
             </Button>
-            <Button>
-              <Send />
-              Send SMS
+            <Button asChild>
+              <Link href="/messages/new">
+                <Send />
+                Send SMS
+              </Link>
             </Button>
           </>
         }
@@ -112,7 +117,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         <WebhookActivityPanel deliveries={data.webhookDeliveries} now={now} />
       </SplitRow>
 
-      <RecentMessagesTable messages={data.messages} />
+      <RecentMessagesTable result={messages} now={new Date()} />
     </>
   );
 }

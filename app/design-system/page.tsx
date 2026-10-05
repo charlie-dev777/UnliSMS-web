@@ -338,7 +338,7 @@ export default function DesignSystemPage() {
         >
           <div className="flex flex-col gap-3.5">
             <Row label="Messages">
-              {(["delivered", "sent", "pending", "scheduled", "received", "failed"] as const).map((s) => (
+              {(["scheduled", "queued", "sending", "sent", "delivered", "failed", "cancelled"] as const).map((s) => (
                 <MessageStatusBadge key={s} status={s} />
               ))}
             </Row>

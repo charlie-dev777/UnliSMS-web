@@ -1,21 +1,26 @@
+import Link from "next/link";
 import { MessageSquare } from "lucide-react";
-import type { Message } from "@/lib/types";
-import { formatClockTime } from "@/lib/format";
+import type { ApiResult, OutboundMessage } from "@/lib/types";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/feedback";
 import { MessageStatusBadge } from "@/components/status";
+import { Timestamp } from "@/components/gateways";
+import { formatSchedule, MessagesForbidden, MessagesUnavailable, messagePreview } from "@/components/messages";
 import { ViewAllLink } from "./view-all-link";
 
-const DIRECTION = { outbound: "Outbound", inbound: "Inbound" } as const;
+const LIMIT = 6;
 
-export function RecentMessagesTable({ messages }: { messages: Message[] }) {
+/** The latest outbound SMS, live from the OnSim API. */
+export function RecentMessagesTable({ result, now }: { result: ApiResult<OutboundMessage[]>; now: Date }) {
+  const messages = result.ok ? result.data.slice(0, LIMIT) : [];
+
   return (
     <Card>
       <CardHeader className="items-center">
         <div>
           <CardTitle>Recent messages</CardTitle>
-          <CardDescription>Latest outbound and inbound SMS</CardDescription>
+          <CardDescription>Latest outbound SMS, scheduled first</CardDescription>
         </div>
         <CardAction>
           <ViewAllLink href="/messages" outline>
@@ -24,16 +29,21 @@ export function RecentMessagesTable({ messages }: { messages: Message[] }) {
         </CardAction>
       </CardHeader>
 
-      {messages.length === 0 ? (
-        <EmptyState icon={MessageSquare} title="No messages yet" description="SMS you send or receive through your gateways will appear here." />
+      {!result.ok ? (
+        result.reason === "forbidden" ? (
+          <MessagesForbidden />
+        ) : (
+          <MessagesUnavailable />
+        )
+      ) : messages.length === 0 ? (
+        <EmptyState icon={MessageSquare} title="No messages yet" description="SMS you send or schedule through your gateways will appear here." />
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Number</TableHead>
-              <TableHead>Direction</TableHead>
               <TableHead>Message</TableHead>
-              <TableHead>Gateway · SIM</TableHead>
+              <TableHead>SIM</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Time</TableHead>
             </TableRow>
@@ -41,20 +51,24 @@ export function RecentMessagesTable({ messages }: { messages: Message[] }) {
           <TableBody>
             {messages.map((m) => (
               <TableRow key={m.id}>
-                <TableCell className="font-mono text-[12.5px]">{m.phoneNumber}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{DIRECTION[m.direction]}</TableCell>
+                <TableCell className="font-mono text-[12.5px]">
+                  <Link href={`/messages/${m.id}`} className="hover:underline">
+                    {m.to}
+                  </Link>
+                </TableCell>
                 <TableCell className="max-w-80 overflow-hidden text-ellipsis text-foreground-2" title={m.body}>
-                  {m.body}
+                  {messagePreview(m.body)}
                 </TableCell>
-                <TableCell>
-                  <span className="font-medium">{m.gatewayName}</span>
-                  <span className="text-xs text-muted-foreground"> · SIM {m.simSlot}</span>
-                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">SIM {m.simSlot}</TableCell>
                 <TableCell>
                   <MessageStatusBadge status={m.status} />
                 </TableCell>
                 <TableCell className="num text-right text-xs text-muted-foreground">
-                  <time dateTime={m.createdAt}>{formatClockTime(m.createdAt)}</time>
+                  {m.status === "scheduled" && m.schedule ? (
+                    formatSchedule(m.schedule)
+                  ) : (
+                    <Timestamp iso={m.sentAt ?? m.createdAt} now={now} />
+                  )}
                 </TableCell>
               </TableRow>
             ))}

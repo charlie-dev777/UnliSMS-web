@@ -1,4 +1,3 @@
-import type { Message } from "./message";
 import type { DailyVolume, DashboardMetrics, GatewayFleetHealth, PlatformMetrics, Registration } from "./metrics";
 import type { Subscription } from "./subscription";
 import type { FailureEvent, SystemHealth } from "./system";
@@ -10,7 +9,6 @@ export interface UserDashboardData {
   generatedAt: string; // ISO 8601; relative times are measured from here
   metrics: DashboardMetrics | null;
   activity: DailyVolume[];
-  messages: Message[];
   webhookDeliveries: WebhookDelivery[];
 }
 
