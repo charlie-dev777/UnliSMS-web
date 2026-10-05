@@ -22,8 +22,8 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-const USER_ROUTES = ["/dashboard", "/gateways", "/messages"];
+const USER_ROUTES = ["/dashboard", "/gateways", "/messages", "/webhooks", "/api-keys"];
 
 export const config = {
-  matcher: ["/login", "/dashboard/:path*", "/gateways/:path*", "/messages/:path*", "/admin/:path*"],
+  matcher: ["/login", "/dashboard/:path*", "/gateways/:path*", "/messages/:path*", "/webhooks/:path*", "/api-keys/:path*", "/admin/:path*"],
 };
