@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Role, User } from "@/lib/types";
+import type { Organization, Role, User } from "@/lib/types";
 import { HOME_BY_ROLE, SESSION_COOKIE } from "./constants";
 import { unsealSession, type Session } from "./session-cookie";
 
@@ -26,3 +26,14 @@ export async function requireRole(role: Role): Promise<User> {
 
 export const requireUser = () => requireRole("USER");
 export const requireAdmin = () => requireRole("ADMIN");
+
+/**
+ * The signed-in user's organization as returned at login (name and `plan_code`). The API has
+ * no endpoint to re-read it, so it reflects the organization at sign-in time.
+ */
+export async function requireUserOrganization(): Promise<Organization> {
+  await requireUser();
+  const session = await getSession();
+  if (!session) redirect("/login");
+  return session.organization;
+}

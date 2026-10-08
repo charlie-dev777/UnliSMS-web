@@ -1,7 +1,7 @@
 import type { DailyVolume, DashboardMetrics, GatewayFleetHealth, PlatformMetrics, Registration } from "./metrics";
-import type { Subscription } from "./subscription";
 import type { FailureEvent, SystemHealth } from "./system";
-import type { User } from "./user";
+import type { Subscription } from "./subscription";
+import type { Organization, User } from "./user";
 import type { WebhookDelivery } from "./webhook";
 
 /** Everything the user /dashboard renders. */
@@ -26,9 +26,12 @@ export interface AdminDashboardData {
 /** What the user portal shell (sidebar, header) needs. */
 export interface UserShellData {
   user: User;
-  subscription: Subscription;
+  /** From the login response; the API has no endpoint to re-read it. */
+  organization: Organization;
   /** Live counts for the nav badge; null when the API refused or failed the read. */
   gateways: { online: number; total: number } | null;
+  /** Plan and plan-limited usage; null when the API refused (member/viewer) or failed the read. */
+  subscription: Subscription | null;
   hasUnreadNotifications: boolean;
 }
 

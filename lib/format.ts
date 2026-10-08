@@ -29,6 +29,15 @@ export function formatCompact(n: number) {
 /** "https://api.acme.ph/hooks/sms" → "api.acme.ph/hooks/sms". */
 export const displayUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
+/**
+ * Display name for an OnSim `plan_code` ("free" → "Free", "pro_monthly" → "Pro monthly"). The API
+ * exposes only the code, never the plan's own name, so this is a readable form of the code.
+ */
+export function formatPlanCode(code: string) {
+  const words = code.trim().replace(/[_-]+/g, " ");
+  return words ? words[0].toUpperCase() + words.slice(1) : "Unknown plan";
+}
+
 export function initials(name: string) {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
@@ -39,6 +48,53 @@ export const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: 
 
 const clock = new Intl.DateTimeFormat("en-US", { timeZone: TIME_ZONE, hour: "numeric", minute: "2-digit" });
 const monthDay = new Intl.DateTimeFormat("en-US", { timeZone: TIME_ZONE, month: "short", day: "numeric" });
+
+/**
+ * `timeZone` if the runtime knows it as an IANA zone, otherwise UTC. Used for zones that come
+ * from the API (the organization's quota timezone): a missing or unknown value falls back to
+ * UTC, never to the browser's, the server's or the portal's display zone.
+ */
+export function safeTimeZone(timeZone: string | null | undefined): string {
+  if (!timeZone) return "UTC";
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone });
+    return timeZone;
+  } catch {
+    return "UTC";
+  }
+}
+
+/**
+ * A date the API computed (a quota reset, a billing period bound) in the organization's
+ * timezone: "Nov 1", with the year when it isn't the current one there ("Jan 1, 2027").
+ */
+export function formatCalendarDate(iso: string, timeZone: string, now: Date = new Date()) {
+  const year = new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric" });
+  const sameYear = year.format(new Date(iso)) === year.format(now);
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(new Date(iso));
+}
+
+/**
+ * Full instant in the organization's timezone, naming the zone:
+ * "Nov 1, 2026, 12:00 AM EDT (America/New_York)", or "… 12:00 AM UTC" for UTC.
+ */
+export function formatZonedDateTime(iso: string, timeZone: string) {
+  const text = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(new Date(iso));
+  return timeZone === "UTC" ? text : `${text} (${timeZone})`;
+}
 
 /** "10:42 AM". */
 export const formatClockTime = (iso: string) => clock.format(new Date(iso));
