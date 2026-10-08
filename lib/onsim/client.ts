@@ -62,9 +62,15 @@ async function onsimFetch(
  * - 403: the session is valid but the organization role can't read this resource
  *   (the API allows owner/admin only). The web session is kept.
  * - 404 → `not_found`. Network errors, timeouts, 5xx and malformed bodies → `unavailable`.
+ *
+ * Pass `context: "action"` when calling from a Server Action, so a 401 clears the cookie there.
  */
-export async function onsimGet<T>(path: string, isValid: (body: unknown) => body is T): Promise<ApiResult<T>> {
-  const response = await onsimFetch("GET", path);
+export async function onsimGet<T>(
+  path: string,
+  isValid: (body: unknown) => body is T,
+  context: "render" | "action" = "render",
+): Promise<ApiResult<T>> {
+  const response = await onsimFetch("GET", path, {}, context);
   if (!response) return { ok: false, reason: "unavailable" };
   if (response.status === 403) return { ok: false, reason: "forbidden" };
   if (response.status === 404) return { ok: false, reason: "not_found" };
@@ -98,9 +104,9 @@ const FAILURE_BY_STATUS: Record<number, Extract<MutationResult<never>, { ok: fal
   429: "rate_limited",
 };
 
-/** Authenticated POST/PATCH/DELETE, for Server Actions only. A 401 ends the web session. */
+/** Authenticated POST/PUT/PATCH/DELETE, for Server Actions only. A 401 ends the web session. */
 export async function onsimMutate<T>(
-  method: "POST" | "PATCH" | "DELETE",
+  method: "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   isValid: (body: unknown) => body is T,
   init: { body?: unknown; headers?: Record<string, string> } = {},

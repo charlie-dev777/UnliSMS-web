@@ -7,3 +7,4 @@ export * from "./system";
 export * from "./metrics";
 export * from "./dashboard";
 export * from "./api-key";
+export * from "./gateway-webhook";
